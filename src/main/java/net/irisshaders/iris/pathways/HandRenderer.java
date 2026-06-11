@@ -47,6 +47,23 @@ public class HandRenderer {
 	}
 
 	private boolean canRender(Camera camera, GameRenderer gameRenderer) {
+		// Allow hand rendering during Flashback replay even though camera is detached / spectator
+		boolean inFlashbackReplay = false;
+		try {
+			Class<?> flashbackClass = Class.forName("com.moulberry.flashback.Flashback");
+			java.lang.reflect.Method isInReplay = flashbackClass.getMethod("isInReplay");
+			inFlashbackReplay = (Boolean) isInReplay.invoke(null);
+		} catch (Exception ignored) {}
+
+		if (inFlashbackReplay) {
+			// During replay, only check basic conditions (not spectator/detached)
+			return !(!((GameRendererAccessor) gameRenderer).getRenderHand()
+				|| !(camera.getEntity() instanceof Player)
+				|| ((GameRendererAccessor) gameRenderer).getPanoramicMode()
+				|| Minecraft.getInstance().options.hideGui
+				|| (camera.getEntity() instanceof LivingEntity && ((LivingEntity) camera.getEntity()).isSleeping()));
+		}
+
 		return !(!((GameRendererAccessor) gameRenderer).getRenderHand()
 			|| camera.isDetached()
 			|| !(camera.getEntity() instanceof Player)
