@@ -22,11 +22,7 @@ public interface DepthCopyStrategy {
 			return new Gl43CopyImage();
 		}
 
-		if (combinedStencilRequired) {
-			return new Gl30BlitFbCombinedDepthStencil();
-		} else {
-			return new Gl20CopyTexture();
-		}
+		return new Gl30BlitFbCombinedDepthStencil();
 	}
 
 	boolean needsDestFramebuffer();

@@ -209,9 +209,13 @@ public class RenderTargets {
 	public void copyPreTranslucentDepth() {
 		if (translucentDepthDirty) {
 			translucentDepthDirty = false;
-			RenderSystem.bindTexture(noTranslucents.getTextureId());
-			depthSourceFb.bindAsReadBuffer();
-			IrisRenderSystem.copyTexImage2D(GL20C.GL_TEXTURE_2D, 0, currentDepthFormat.getGlInternalFormat(), 0, 0, cachedWidth, cachedHeight, 0);
+			// Use blit framebuffer instead of copyTexImage2D to avoid "Depth formats do not match" errors.
+			// copyTexImage2D writes directly to a depth texture from the read framebuffer, which fails
+			// when the source depth buffer and destination texture have different internal formats.
+			IrisRenderSystem.blitFramebuffer(depthSourceFb.getId(), noTranslucentsDestFb.getId(), 0, 0, cachedWidth, cachedHeight,
+				0, 0, cachedWidth, cachedHeight,
+				GL30C.GL_DEPTH_BUFFER_BIT,
+				GL30C.GL_NEAREST);
 		} else {
 			copyStrategy.copy(depthSourceFb, getDepthTexture(), noTranslucentsDestFb, noTranslucents.getTextureId(),
 				getCurrentWidth(), getCurrentHeight());
@@ -221,9 +225,11 @@ public class RenderTargets {
 	public void copyPreHandDepth() {
 		if (handDepthDirty) {
 			handDepthDirty = false;
-			RenderSystem.bindTexture(noHand.getTextureId());
-			depthSourceFb.bindAsReadBuffer();
-			IrisRenderSystem.copyTexImage2D(GL20C.GL_TEXTURE_2D, 0, currentDepthFormat.getGlInternalFormat(), 0, 0, cachedWidth, cachedHeight, 0);
+			// Use blit framebuffer instead of copyTexImage2D to avoid "Depth formats do not match" errors.
+			IrisRenderSystem.blitFramebuffer(depthSourceFb.getId(), noHandDestFb.getId(), 0, 0, cachedWidth, cachedHeight,
+				0, 0, cachedWidth, cachedHeight,
+				GL30C.GL_DEPTH_BUFFER_BIT,
+				GL30C.GL_NEAREST);
 		} else {
 			copyStrategy.copy(depthSourceFb, getDepthTexture(), noHandDestFb, noHand.getTextureId(),
 				getCurrentWidth(), getCurrentHeight());
