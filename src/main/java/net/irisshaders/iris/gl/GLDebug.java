@@ -78,12 +78,18 @@ public final class GLDebug {
 		if (caps.OpenGL43) {
 			Iris.logger.info("[GL] Using OpenGL 4.3 for error logging.");
 			GLDebugMessageCallback proc = GLDebugMessageCallback.create((source, type, id, severity, length, message, userParam) -> {
+				String msg = GLDebugMessageCallback.getMessage(length, message);
+				// Suppress spammy "Depth formats do not match" error that occurs on some drivers
+				// without actually affecting rendering correctness
+				if (id == 1282 && msg != null && msg.contains("Depth formats do not match")) {
+					return;
+				}
 				stream.println("[LWJGL] OpenGL debug message");
 				printDetail(stream, "ID", String.format("0x%X", id));
 				printDetail(stream, "Source", getDebugSource(source));
 				printDetail(stream, "Type", getDebugType(type));
 				printDetail(stream, "Severity", getDebugSeverity(severity));
-				printDetail(stream, "Message", GLDebugMessageCallback.getMessage(length, message));
+				printDetail(stream, "Message", msg);
 				printTrace(stream);
 			});
 			GL43C.glDebugMessageControl(4352, 4352, GL43C.GL_DEBUG_SEVERITY_HIGH, (int[]) null, true);

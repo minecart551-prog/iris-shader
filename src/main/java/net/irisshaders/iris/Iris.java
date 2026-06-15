@@ -384,6 +384,9 @@ public class Iris {
 
 		int success;
 		if (enable) {
+			// Disable Mojang's built-in debug callback to prevent duplicate messages,
+			// then set up Iris's own filtered debug callback.
+			GLDebug.disableDebugMessages();
 			success = GLDebug.setupDebugMessageCallback();
 		} else {
 			GLDebug.reloadDebugState();
