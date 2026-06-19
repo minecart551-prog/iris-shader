@@ -282,8 +282,14 @@ public class CommonTransformer {
 				"float start;" +
 				"float end;" +
 				"float scale;" +
-				"};",
-			"iris_FogParameters iris_Fog = iris_FogParameters(iris_FogColor, iris_FogDensity, iris_FogStart, iris_FogEnd, 1.0 / (iris_FogEnd - iris_FogStart));");
+			"};",
+			"iris_FogParameters iris_Fog;");
+		tree.appendMainFunctionBody(t,
+			"iris_Fog.color = iris_FogColor;\n" +
+			"	iris_Fog.density = iris_FogDensity;\n" +
+			"	iris_Fog.start = iris_FogStart;\n" +
+			"	iris_Fog.end = iris_FogEnd;\n" +
+			"	iris_Fog.scale = 1.0 / (iris_FogEnd - iris_FogStart);");
 
 		// TODO: Add similar functions for all legacy texture sampling functions
 		renameFunctionCall(root, "texture2D", "texture");
